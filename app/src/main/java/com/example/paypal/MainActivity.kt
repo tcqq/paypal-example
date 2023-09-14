@@ -1,5 +1,7 @@
 package com.example.paypal
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -19,6 +21,11 @@ class MainActivity : AppCompatActivity() {
     private val tag = "MainActivity"
 
     private lateinit var binding: ActivityMainBinding
+
+    private val clientId = "Aai8pSvuCfxseUf0q5WyRqZjl6hiwP_ppL1Tvy8lnBWWYH_hYqSOk8FIvv1xWnSuQco7VlCkE3jN1e9u"
+    private val redirectUri = "com.example.paypal://paypalpay"
+    private val authUrl =
+        "${getPayPalBaseUrl(PayPalEnvironment.SANDBOX)}/signin/authorize?client_id=$clientId&redirect_uri=$redirectUri&response_type=code&scope=openid profile"
 
     private val paypalSdk: PayPalCheckout
         get() = PayPalCheckout
@@ -68,7 +75,35 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
+
+
+        binding.authorization.setOnClickListener {
+            val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl))
+            startActivity(browserIntent)
+        }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val uri = intent.data
+        if (uri != null && uri.toString().startsWith(redirectUri)) {
+            val authorizationCode = uri.getQueryParameter("code")
+            Log.d("MainActivity", "authorizationCode: $authorizationCode")
+            binding.authCode.setText(authorizationCode)
+        }
+    }
+
+    private fun getPayPalBaseUrl(environment: PayPalEnvironment): String {
+        return when (environment) {
+            PayPalEnvironment.LIVE -> "https://www.paypal.com"
+            PayPalEnvironment.SANDBOX -> "https://www.sandbox.paypal.com"
+        }
+    }
+
+    enum class PayPalEnvironment {
+        LIVE, SANDBOX
+    }
+
 
     private fun showToast(text: String) {
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show()

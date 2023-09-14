@@ -17,13 +17,24 @@
         tools:targetApi="31">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:launchMode="singleTop"> <!-- 添加这个属性以确保onNewIntent会被调用 -->
+
+            <!-- 这是您原本的intent-filter，它使MainActivity成为启动活动 -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- 这是为了捕获PayPal重定向的intent-filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.example.paypal" android:host="paypalpay" />
+            </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
